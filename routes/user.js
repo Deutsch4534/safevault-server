@@ -1,7 +1,7 @@
 let express = require('express'),
     router = express.Router(),
     constants = require('../utils/constant'),
-    functios = require('../utils/functions'),
+    functions = require('../utils/functions'),
     multer  = require('multer'),
     db_insert = require('../db-functions/insert'),
     db_read = require('../db-functions/read');
@@ -20,9 +20,16 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 
+
 router.post("/download-file", function (req, res) {
     db_read.returnFile(req.body.address , req.body.file_name , function (result) {
             res.download(result)
+    })
+});
+
+router.post("/get-hash", function (req, res) {
+    db_read.returnFileHash(req.body.address , req.body.file_name , async function (result) {
+        res.send(await functions.calculateHashOfFile(result))
     })
 });
 

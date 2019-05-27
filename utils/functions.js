@@ -137,14 +137,18 @@ exports.uploadFileToAzure = async (file, public_key ,hash) => {
     }
 };
 
-exports.downloadFile = async (file , public_key) => {
+
+exports.downloadFile = function (address,file_name , callback) {
     try {
-        await fileService.getFileToLocalFile(constants.shareName,"0xF1C03e97EC3013ED8444ffdfF43889ef286FCFD9","2.JPG-123","test.png", function() {
+        let localFileAddress = "azure_downloads/"+file_name;
+        fileService.getFileToLocalFile(constants.shareName,address,file_name,localFileAddress, function() {
+            callback(localFileAddress)
         });
+
     }catch (e) {
 
     }
-};
+}
 
 exports.calculateHashOfFile = async (file) => {
     try {
