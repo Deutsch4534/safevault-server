@@ -1,81 +1,31 @@
 var exports = module.exports = {},
-    utilsFunctions = require('../utils/functions'),
-    certificatesModel = require('../models/certificate'),
-    participantModel = require('../models/participant'),
-    constants = require('../utils/constant');
+    azure = require('azure-storage'),
+    fs = require('fs'),
+    path = require('path'),
+    constants = require('../utils/constant'),
+    fileModel = require('../models/file');
 
-exports.count = 0 ;
+var fileService = azure.createFileService('safevault', 'FVRq9jdWI4XXbE6EZ/FAypP5M6KxcVpwTwKT1LrNwS7Ei42NicH4UWDuNkF8bd9MLDMvWNVlr5pv+LufuJN+Ug==');
+let directory = "azure_downloads";
 
-exports.getCertificateCount = async () => {
-    return exports.count;
-};
-
-exports.ifParticipantExist= async (blockstack_id) => {
+exports.returnFile =function (address ,file_name , callback) {
     try {
-        let participant = await participantModel.findOne({blockstack_id});
-        if(participant){
-            return true;
-        }
-        return false
-    }  catch (e) {
-        console.log(e);
-        throw new Error(e);
-    }
-};
-exports.getParticipants= async () => {
-    try {
-        return await participantModel.find({});
+
+        let localFileAddress = "azure_downloads/"+file_name;
+       fileService.getFileToLocalFile(constants.shareName,address,file_name,localFileAddress, function() {
+                callback(localFileAddress)
+        });
     }  catch (e) {
         console.log(e);
         throw new Error(e);
     }
 };
 
-exports.getCertificates= async () => {
+exports.returnFilesName= function (address, callback)  {
     try {
-        let certificates =  await certificatesModel.find({});
-        let returnedCertificates = [];
-        for ( let i = 0 ; i< certificates.length; i++){
-            let singleCert = certificates[i].toObject();
-            delete singleCert.__v;
-            returnedCertificates.push(singleCert);
-        }
-        return returnedCertificates;
-    }  catch (e) {
-        console.log(e);
-        throw new Error(e);
-    }
-};
-
-
-exports.getCertificateByBlockstackId= async (blockstack_id) => {
-    try {
-        let certificates =  await certificatesModel.find({blockstack_id});
-        if(certificates.length <1){
-            throw new Error("No certificates found")
-        }
-        let returnedCertificates = [];
-        for ( let i = 0 ; i< certificates.length; i++){
-            let singleCert = certificates[i].toObject();
-            delete singleCert.__v;
-            returnedCertificates.push(singleCert);
-        }
-        return returnedCertificates;
-    }  catch (e) {
-        console.log(e);
-        throw new Error(e);
-    }
-};
-
-
-exports.getCertificateById = async (id) => {
-    try {
-        exports.count++;
-        let data  = await certificatesModel.findById(id);
-        let certificate = data.toObject();
-        delete certificate.__v;
-        return certificate;
-
+        fileService.listFilesAndDirectoriesSegmented(constants.shareName,address,null ,  function(error,result,response) {
+            callback (result.entries.files)
+        });
     }  catch (e) {
         console.log(e);
         throw new Error(e);

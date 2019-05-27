@@ -5,22 +5,22 @@ let express = require("express"),
     bodyParser = require("body-parser"),
     mongoose = require("mongoose");
 
-let issuerRoutes = require('./routes/issuer');
+let userRoutes = require('./routes/user');
 // App Config
 
-mongoose.connect("mongodb://endorx123:123456A@ds151049.mlab.com:51049/endorx");
+mongoose.connect("mongodb://safevault-user:user123@ds062178.mlab.com:62178/safevault");
 
-app.use(bodyParser.json({extended: true}));
+app.use(bodyParser.json({extended: true , limit : '50mb'} ));
 app.use(cors());
 app.use(methodOverride("_method"));
 
 
-app.use('/issuer', issuerRoutes);
+app.use('/user', userRoutes);
 
 
 const port = process.env.PORT || 7001;
 app.listen(port);
 
-console.log(`Endorx Server listening on ${port}`);
+console.log(`SafeVault Server listening on ${port}`);
 
 module.exports.app = app;

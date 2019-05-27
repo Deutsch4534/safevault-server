@@ -4,6 +4,8 @@ var exports = module.exports = {};
 exports.secret = 'MFswDQYJKoZIhvcNAQEBBQADSgAwRwJAW4lFUCuJ6QDo5djTQtuhebj9aNq/m59hwvgWNXNz3q8PJ6vQXEOoXE7smZARn+4+7RP+olUYfIGDiji4NBLYCQIDAQAB';
 exports.SALT = 10;
 
+exports.shareName = 'files';
+
 exports.responseMessages = {
     participantUpdated :"Successfully updated participant",
     certificateAdded : "Successfully added Certificate",

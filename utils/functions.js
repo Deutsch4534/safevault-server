@@ -1,29 +1,158 @@
 var exports = module.exports = {},
-    { MerkleTree } = require('merkletreejs'),
-     SHA256 = require('crypto-js/sha256'),
-    constant = require('../utils/constant'),
-    nodeMailer = require('nodemailer');
+    fs = require('fs'),
+    encryptor = require('file-encryptor'),
+    constants = require('../utils/constant'),
+    sha256File = require('sha256-file'),
+    {generateMnemonic, EthHdWallet} = require('eth-hd-wallet'),
+    encrypt = require('node-file-encrypt');
+    constant = require('../utils/constant');
+
+var azure = require('azure-storage');
 
 
+var fileService = azure.createFileService('safevault', 'FVRq9jdWI4XXbE6EZ/FAypP5M6KxcVpwTwKT1LrNwS7Ei42NicH4UWDuNkF8bd9MLDMvWNVlr5pv+LufuJN+Ug==');
+
+var options = { algorithm: 'aes256' };
 
 
-exports.createMerkleTree = async () => {
-  try {
-      const leaves = ['a', 'b', 'c'].map(x => SHA256(x))
-      const tree = new MerkleTree(leaves, SHA256)
-      const root = tree.getRoot().toString('hex')
-      const leaf = SHA256('a')
-      const proof = tree.getProof(leaf)
-      console.log(proof) // true
-  }  catch (e) {
+exports.decryptFileWithPublicKey = async (key, file) => {
+    try {
 
-  }
+    } catch (e) {
+
+    }
 };
 
-exports.isDuplicateUser = async (user) => {
-    let duplicateUser = await adminModel.find({email: user.email});
-    return !Array.isArray(duplicateUser) || !duplicateUser.length;
+// let encryptPath = '';
+//
+// exports.decryptFileWithPublicKey = async (key, file) => {
+//     try {
+//         fs.unlink(file.path, function() {});
+//         let f = new encrypt.FileEncrypt(encryptPath);
+//         f.openSourceFile();
+//         f.decrypt('111111');
+//         console.log("decrypt sync done");
+//     } catch (e) {
+//
+//     }
+// };
+//
+// exports.encryptFileWithPublicKey = async (key, file) => {
+//     try{
+//         let f = new encrypt.FileEncrypt('decrypted');
+//         f.openSourceFile();
+//         f.encrypt('111111');
+//         encryptPath = f.encryptFilePath;
+//         console.log("encrypt sync done");
+//     } catch (e) {
+//
+//     }
+// };
+exports.encryptFileWithPublicKey = async (key, file) => {
+    try {
+        console.log(file)
+        await encryptor.encryptFile(file.path, `encrypted/${file.originalname}`, key,  function (err) {
+            if(err){
+                console.log(err)
+            }
+            return `encrypted/${file.originalname}`;
+        });
+        await encryptor.decryptFile(`encrypted/${file.originalname}`, 'decrypted/fff.jpg', key,  function (err) {
+            if(err){
+                console.log(err)
+            }
+            console.log("here")
+        });
+    } catch (e) {
+
+    }
 };
+exports.getFileNamesFromPublicKey = async (public_key) => {
+    try {
+        fileService.listFilesAndDirectoriesSegmented(constants.shareName,public_key,null , function(error,result,reponse) {
+            return result.entries.files;
+        })
+    }catch (e) {
+        console.log(e);
+    }
+};
+
+
+
+exports.generatePublicKeyFromMnemonic = async (mnemonic) => {
+    try {
+        const wallet = EthHdWallet.fromMnemonic(mnemonic);
+        const addresses = wallet.generateAddresses(1);
+        return addresses[0];
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+exports.generateMnemonic = async () => {
+    try {
+        return await generateMnemonic();
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+exports.deleteFile = (file) => {
+    try {
+        console.log(file)
+        fs.unlink(`uploads/${file.filename}`, function () {
+            console.log("Deleted")
+        });
+    } catch (e) {
+
+    }
+};
+
+
+exports.uploadFileToAzure = async (file, public_key ,hash) => {
+    try {
+        await fileService.createShareIfNotExists(constants.shareName, function (error, result, response) {
+            if (!error) {
+                // if result = true, share was created.
+                // if result = false, share already existed.
+            }
+        });
+
+        await fileService.createDirectoryIfNotExists(constants.shareName, public_key, function (error, result, response) {
+            if (!error) {
+                // if result.created = true, share was created.
+                // if result.created = false, share already existed.
+            }
+        });
+
+        await fileService.createFileFromLocalFile(constants.shareName, public_key,file.originalname+"-"+hash, file.path, function (error, result, response) {
+            if (!error) {
+                // file uploaded
+            }
+            exports.deleteFile(file.originalname)
+        });
+
+    } catch (e) {
+        console.log(e)
+    }
+};
+
+exports.downloadFile = async (file , public_key) => {
+    try {
+        await fileService.getFileToLocalFile(constants.shareName,"0xF1C03e97EC3013ED8444ffdfF43889ef286FCFD9","2.JPG-123","test.png", function() {
+        });
+    }catch (e) {
+
+    }
+};
+
+exports.calculateHashOfFile = async (file) => {
+    try {
+        return await  sha256File(file);
+    }catch (e) {
+
+    }
+}
 
 exports.isEmpty = (obj) => {
     for (let key in obj) {
@@ -33,53 +162,6 @@ exports.isEmpty = (obj) => {
     return true;
 };
 
-// giving access to nodeMailer for logging into mail account
-let mailTransporter = nodeMailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: "haqtaha@gmail.com",
-        pass: 'mvibckbmjwpddzsj'
-    }
-});
-
-exports.sendContactMail = async (details) => {
-    try {
-        const mailOptions = {
-            from: "haqtaha@gmail.com", // sender address
-            to: "haqtaha@gmail.com", // list of receivers
-            subject: "Empty", // Subject line
-            text: `This message was send by ${details.name} using email : ${details.email} the message was ${details.message}`
-
-        };
-        mailTransporter.sendMail(mailOptions, function (err, info) {
-            if (err) {
-                console.log(err);
-                throw new Error(err);
-            }
-            else {
-                console.log(constant.responseMessages.Success)
-                return constant.responseMessages.Success
-            }
-        });
-
-    } catch (e) {
-        console.log(e);
-        throw new Error(e)
-    }
-};
-
-
-//
-//
-// exports.isDuplicateAdmin = async (user) => {
-//     let duplicateUser = await adminModel.find({email: user.email});
-//     return !Array.isArray(duplicateUser) || !duplicateUser.length;
-// };
-//
-// exports.isDuplicateUser = async (user) => {
-//     let duplicateUser = await userModel.find({email: user.email});
-//     return !Array.isArray(duplicateUser) || !duplicateUser.length;
-// };
 
 exports.isEmpty = (obj) => {
     for (let key in obj) {

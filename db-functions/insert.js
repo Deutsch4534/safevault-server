@@ -1,25 +1,20 @@
 var exports = module.exports = {},
     constants = require('../utils/constant'),
-    utilsFunctions = require('../utils/functions'),
-    participantModel = require('../models/participant'),
-    certificateModel = require ('../models/certificate');
+    functions = require('../utils/functions'),
+    fs = require('fs'),
+    fileModel = require('../models/file');
 
-exports.insertParticipant = async (participant) => {
+exports.insertFile = async (file ,address) => {
     try {
-        await participantModel.create(participant);
-        return constants.responseMessages.participantCreated;
+        // const address ="0xC0eB7c1828d6818697dd1D1589d1A5F714FF84EF";
+        const fileHash = await functions.calculateHashOfFile(file.path);
+       await functions.uploadFileToAzure(file ,address , fileHash);
+
     } catch (e) {
         console.log(e);
         throw new Error(e)
     }
 };
 
-exports.insertCertificates = async (certificate) => {
-    try {
-        return await certificateModel.create(certificate);
-    } catch (e) {
-        console.log(e);
-        throw new Error(e)
-    }
-};
+
 
