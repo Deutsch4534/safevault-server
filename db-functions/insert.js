@@ -6,7 +6,6 @@ var exports = module.exports = {},
 
 exports.insertFile = async (file ,address) => {
     try {
-        const address ="0xC0eB7c1828d6818697dd1D1589d1A5F714FF84EF";
         const fileHash = await functions.calculateHashOfFile(file.path);
        await functions.uploadFileToAzure(file ,address , fileHash);
        return fileHash;
