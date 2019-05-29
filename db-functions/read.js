@@ -36,7 +36,13 @@ exports.returnFile =function (address ,file_name , callback) {
 exports.returnFilesName= function (address, callback)  {
     try {
         fileService.listFilesAndDirectoriesSegmented(constants.shareName,address,null ,  function(error,result,response) {
-            callback (result.entries.files)
+            console.log(result)
+            if(result === null){
+                callback("No files found")
+            }
+            if(result!=null){
+                callback (result.entries.files)
+            }
         });
     }  catch (e) {
         console.log(e);

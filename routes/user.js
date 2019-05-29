@@ -59,7 +59,18 @@ router.post("/upload-file",  upload.single('my-file'), function (req, res) {
 
 router.post("/files-by-address" , async function (req, res) {
    db_read.returnFilesName(req.body.address,function (result) {
-       res.send(result)
+       if(result === "No files found"){
+           res.status(500).send( {
+               responseCode: 500,
+               responseMessage: result
+           })
+       }
+       else {
+           res.status(200).send( {
+               responseCode: 200,
+               responseMessage: result
+           })
+       }
    })
 });
 
