@@ -125,7 +125,7 @@ exports.uploadFileToAzure = async (file, public_key ,hash) => {
             }
         });
 
-        await fileService.createFileFromLocalFile(constants.shareName, public_key,file.originalname+"-"+hash, file.path, function (error, result, response) {
+        await fileService.createFileFromLocalFile(constants.shareName, public_key,file.originalname, file.path, function (error, result, response) {
             if (!error) {
                 // file uploaded
             }
