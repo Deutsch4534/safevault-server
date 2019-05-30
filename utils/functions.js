@@ -23,31 +23,6 @@ exports.decryptFileWithPublicKey = async (key, file) => {
     }
 };
 
-// let encryptPath = '';
-//
-// exports.decryptFileWithPublicKey = async (key, file) => {
-//     try {
-//         fs.unlink(file.path, function() {});
-//         let f = new encrypt.FileEncrypt(encryptPath);
-//         f.openSourceFile();
-//         f.decrypt('111111');
-//         console.log("decrypt sync done");
-//     } catch (e) {
-//
-//     }
-// };
-//
-// exports.encryptFileWithPublicKey = async (key, file) => {
-//     try{
-//         let f = new encrypt.FileEncrypt('decrypted');
-//         f.openSourceFile();
-//         f.encrypt('111111');
-//         encryptPath = f.encryptFilePath;
-//         console.log("encrypt sync done");
-//     } catch (e) {
-//
-//     }
-// };
 exports.encryptFileWithPublicKey = async (key, file) => {
     try {
         console.log(file)

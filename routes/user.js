@@ -29,7 +29,16 @@ router.post("/download-file", function (req, res) {
 
 router.post("/get-hash", function (req, res) {
     db_read.returnFileHash(req.body.address , req.body.file_name , async function (result) {
-        res.send(await functions.calculateHashOfFile(result))
+       let hash = await functions.calculateHashOfFile(result);
+        res.status(200).send(
+            {
+                responseCode: 200,
+                responseMessage: constants.responseMessages.Success,
+                data: {
+                    result: hash
+                }
+            }
+        )
     })
 });
 
